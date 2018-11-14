@@ -69,13 +69,16 @@ for rect in obs_rects_after:
 # Show Plot # 
 #plt.show()
 
+
+goal_region = [(600,600), 50, 50]
 # Create Config Space Object #
-config_space = cspace.Cspace(obstacles, (r, width-2*r), (r, length-2*r))
+config_space = cspace.Cspace(obstacles, (r, width-r), (r, length-r), width, length, goal_region)
 
 #print obstacles[1].fill
 
 #print config_space.detect_point_collision([(200,200)])
 
-tree = rrt.RRT((200,200), (650,650), config_space, ax2)
+
+tree = rrt.RRT((200,200), goal_region, config_space, ax2)
 
 tree.explore()
