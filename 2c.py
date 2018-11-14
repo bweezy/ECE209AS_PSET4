@@ -3,6 +3,7 @@ import matplotlib.pyplot as plt
 import matplotlib.patches as patches
 import obstacle
 import cspace
+import rrt
 
 ## Map Parameters ##
 length = 750
@@ -44,12 +45,10 @@ for rect in obs_rects_before:
 	ax1.add_patch(rect)
 
 
-
 ##### Configuration Space #####
 config_origin = (r,r)
 config_length = length-2*r
 config_width = width-2*r
-
 
 # Plot Configuration Space Border #
 rect2_outer = patches.Rectangle((0,0),width,length,linewidth=1,edgecolor='r',facecolor='r')
@@ -61,16 +60,22 @@ ax2.add_patch(rect2_inner)
 obs_rects_after = []
 for obs in obstacles:
 	obs.translate(r)
-	obs_rects_after.append(patches.Rectangle((obs.x, obs.y) ,obs.width, obs.length, linewidth=1, edgecolor='r', facecolor='r'))
+	obs_rects_after.append(patches.Rectangle((obs.x, obs.y), obs.width, obs.length, linewidth=1, edgecolor='r', facecolor='r'))
 
 # Plot Obstacles #
 for rect in obs_rects_after:
 	ax2.add_patch(rect)
 
 # Show Plot # 
-plt.show()
+#plt.show()
 
 # Create Config Space Object #
-config_space = cspace.Cspace(obs, (r, width-2*r), (r, length-2*r))
+config_space = cspace.Cspace(obstacles, (r, width-2*r), (r, length-2*r))
 
+#print obstacles[1].fill
 
+#print config_space.detect_point_collision([(200,200)])
+
+tree = rrt.RRT((200,200), (650,650), config_space, ax2)
+
+tree.explore()
