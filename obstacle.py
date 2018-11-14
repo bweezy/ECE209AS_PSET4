@@ -33,8 +33,8 @@ class Obstacle:
 			self.border[width + i][1] = y + i
 
 	def translate(self, r):
-		new_x = min(0, self.x - r)
-		new_y = min(0, self.y - r)
+		new_x = max(0, self.x - r)
+		new_y = max(0, self.y - r)
 
 		self.update(new_x, new_y, int(np.ceil(self.length + r)), int(np.ceil(self.width + r)))
 
