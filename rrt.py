@@ -16,7 +16,7 @@ class Node:
 class RRT:
 
 
-	def __init__(self, start, goal, config_space):
+	def __init__(self, start, goal, config_space, axis):
 
 		self.start = Node(start[0], start[1])
 		self.goal = Node(goal[0], goal[1])
@@ -24,6 +24,7 @@ class RRT:
 		self.nodes = []
 		self.edges = {}
 		self.nodes.append(self.start)
+		self.axis = axis
 
 	def update(self):
 
@@ -68,8 +69,9 @@ class RRT:
 			connections = self.edges[key]
 			for connection in connections:
 				goal_x, goal_y = connection.getxy()
-				plt.arrow(curr_x, curr_y, goal_x-curr_x, goal_y-curr_y, head_width=0, head_length=0)
-		plt.scatter(x,y)
+				self.axis.plot([curr_x, goal_x], [curr_y, goal_y])
+		self.axis.scatter(x,y)
+		print "showing graph"
 		plt.show()
 
 
