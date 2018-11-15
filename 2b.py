@@ -10,8 +10,6 @@ def get_trajectory_input(initial_state, target_position):
     init_x = float(initial_state[0])
     init_y = float(initial_state[1])
     init_theta = (initial_state[2]+2*np.pi)%(2*np.pi)
-    if init_theta > np.pi: # keep theta between -180 to 180
-        init_theta = init_theta - 2*np.pi
 
     target_x = float(target_position[0])
     target_y = float(target_position[1])
@@ -33,19 +31,24 @@ def get_trajectory_input(initial_state, target_position):
             move_backward = True
 
     else: # if d vector and tangent line does not align, robot follows a curved trajectory.
-        if abs(init_theta-d_angle) > np.pi/2.0: # if robot needs to turn more than 90 degrees, let it move backwards
+        delta_angle = ((d_angle - init_theta)+2*np.pi)%(2*np.pi)
+        if delta_angle > np.pi:
+            delta_angle = delta_angle - 2*np.pi
+
+        if abs(delta_angle) > np.pi/2.0: # if robot needs to turn more than 90 degrees, let it move backwards
             move_backward = True
             init_theta = init_theta+np.pi # flip the robot direction by 180 degrees
-            if init_theta > np.pi: # keep theta between -180 to 180
-                init_theta = init_theta - 2*np.pi
+
+            ## update delta_angle
+            delta_angle = ((d_angle - init_theta)+2*np.pi)%(2*np.pi)
+            if delta_angle > np.pi:
+                delta_angle = delta_angle - 2*np.pi
 
         angle_btw_d_tan = abs(d_angle - init_theta) # angle between d vector and tangent line (in the direction robot is facing)
         angle = abs(np.pi - 2.0*(np.pi/2.0-angle_btw_d_tan)) # angle of the arc
         radius = abs(d/(2.0*np.sin(angle/2.0))) # radius of the arc
 
-        # print d, d_angle*180/np.pi, angle_btw_d_tan*180/np.pi, angle*180/np.pi, radius # for debugging
-
-        if d_angle > init_theta: # robot is moving counter-clockwise
+        if delta_angle > 0: # robot is moving counter-clockwise
             # Given that the robot travels to the target in 1 second
             omega_l = (radius - wheel_distance/2.0)*angle/wheel_radius # angular velocity of left wheel
             omega_r = (radius + wheel_distance/2.0)*angle/wheel_radius # angular velocity of right wheel
@@ -59,6 +62,7 @@ def get_trajectory_input(initial_state, target_position):
             angle_radius = init_theta - np.pi/2.0 # orientation of the line connecting circle center and initial point
             theta2 = angle_radius + np.pi
             theta1 = theta2 - angle
+            # print omega_l, omega_r
 
         # slope = np.tan(angle_radius);
         delta_x = radius * np.cos(angle_radius)
@@ -70,47 +74,56 @@ def get_trajectory_input(initial_state, target_position):
         trajectory_obj = patches.Arc((center_x, center_y), radius*2, radius*2,
                      theta1=theta1*180.0/np.pi, theta2=theta2*180.0/np.pi, linewidth=2) # arc object to plot curved trajectory
 
-        # print angle_radius*180.0/np.pi, center_x, center_y, theta1*180.0/np.pi, theta2*180.0/np.pi, radius
+        # print round(d), 'init_theta: ', round(init_theta*180/np.pi), 'd_angle: ', round(d_angle*180/np.pi), 'delta angle', round(delta_angle*180/np.pi)#round(angle_btw_d_tan*180/np.pi), round(angle*180/np.pi) # for debugging
+        # print round(angle_radius*180.0/np.pi), 'center: ', round(center_x), round(center_y), 'thetas: ', round(theta1*180.0/np.pi), round(theta2*180.0/np.pi), round(radius)
 
     if move_backward:
+        orig_omega_l = omega_l
         omega_l = -omega_r
-        omega_r = -omega_l
+        omega_r = -orig_omega_l
 
     return trajectory_obj, omega_l, omega_r
 
 
 if __name__ == "__main__":
-    initial_state = (300,-100,0)
-    goal_position = (0,0)
-    trajectory_obj, omega_l, omega_r = get_trajectory_input(initial_state, goal_position)
+    initial_state_list = [(-200,-200,np.pi/2),(300,-100,np.pi/8), (-300,-300,np.pi/4)]
+    goal_position_list = [(200,200),(-200,300), (200, 200)]
 
-    print 'Initial state (pos_x, pos_y, theta): (', initial_state[0], 'mm, ', initial_state[1], 'mm, ', initial_state[2], 'radian)'
-    print 'Goal (pos_x, pos_y): (', goal_position[0], 'mm, ', goal_position[1], 'mm)'
-    print 'Inputs (w_l, w_r): (', round(omega_l,2), 'rad/s, ', round(omega_r,2), 'rad/s)'
+    for i in range(0,len(initial_state_list)):
+        initial_state = initial_state_list[i]
+        goal_position = goal_position_list[i]
 
-    fig, ax = plt.subplots(1)
+        trajectory_obj, omega_l, omega_r = get_trajectory_input(initial_state, goal_position)
 
-    plt.ylim(-1000, 1000)
-    plt.xlim(-1000, 1000)
+        print '========================================================='
+        print 'Initial state (pos_x, pos_y, theta): (', initial_state[0], 'mm, ', initial_state[1], 'mm, ', initial_state[2], 'radian)'
+        print 'Goal (pos_x, pos_y): (', goal_position[0], 'mm, ', goal_position[1], 'mm)'
+        print 'Inputs (w_l, w_r): (', round(omega_l,2), 'rad/s, ', round(omega_r,2), 'rad/s)'
+        print '========================================================='
 
-    initial_point = patches.Circle((initial_state[0],initial_state[1]),radius=10,facecolor='g')
-    goal_point = patches.Circle(goal_position,radius=10,facecolor='r')
+        fig, ax = plt.subplots(1)
 
-    ax.add_patch(initial_point)
-    ax.add_patch(goal_point)
+        plt.ylim(-1000, 1000)
+        plt.xlim(-1000, 1000)
 
-    if type(trajectory_obj) is lines.Line2D:
-        ax.add_line(trajectory_obj)
-    else:
-        ax.add_patch(trajectory_obj)
+        initial_point = patches.Circle((initial_state[0],initial_state[1]),radius=10,facecolor='g')
+        goal_point = patches.Circle(goal_position,radius=10,facecolor='r')
 
-    plt.annotate(
-        'initial position',
-        xy=(initial_state[0],initial_state[1]), arrowprops=dict(arrowstyle='->'), xytext=(initial_state[0],initial_state[1]-100))
+        ax.add_patch(initial_point)
+        ax.add_patch(goal_point)
 
-    plt.annotate(
-        'goal',
-        xy=goal_position, arrowprops=dict(arrowstyle='->'), xytext=(goal_position[0],goal_position[1]+100))
+        if type(trajectory_obj) is lines.Line2D:
+            ax.add_line(trajectory_obj)
+        else:
+            ax.add_patch(trajectory_obj)
 
-    plt.show()
+        plt.annotate(
+            'initial position',
+            xy=(initial_state[0],initial_state[1]), arrowprops=dict(arrowstyle='->'), xytext=(initial_state[0],initial_state[1]-100))
+
+        plt.annotate(
+            'goal',
+            xy=goal_position, arrowprops=dict(arrowstyle='->'), xytext=(goal_position[0],goal_position[1]+100))
+
+        plt.show()
 
