@@ -2,6 +2,11 @@ import numpy as np
 import matplotlib.pyplot as plt
 import matplotlib.patches as patches
 
+## Map Parameters ##
+length = 750
+width = 750
+
+
 class Cspace:
 
 	def __init__(self, obstacles, x_boundaries, y_boundaries, orig_width, orig_length, goal):
@@ -46,5 +51,8 @@ class Cspace:
 
 		rect = patches.Rectangle(self.goal[0], self.goal[1], self.goal[2],linewidth=1,edgecolor='y',facecolor='y')
 		ax.add_patch(rect)
+
+		# plt.ylim(-10, length+10)
+		# plt.xlim(-10, width+10)
 
 		return ax
