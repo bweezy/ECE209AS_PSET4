@@ -2,6 +2,7 @@ import numpy as np
 from distance import *
 import matplotlib.pyplot as plt
 import matplotlib.patches as patches
+import time
 
 class Node:
 
@@ -16,8 +17,7 @@ class Node:
 
 class RRT:
 
-
-	def __init__(self, start, goal, config_space, axis):
+	def __init__(self, start, goal, config_space):
 
 		self.start = Node(start[0], start[1])
 		self.goal = goal
@@ -25,7 +25,7 @@ class RRT:
 		self.nodes = []
 		self.edges = {}
 		self.nodes.append(self.start)
-		self.axis = axis
+		# self.axis = axis
 
 	def update(self):
 
@@ -33,12 +33,23 @@ class RRT:
 		y = np.random.randint(self.config_space.y_boundaries[0], self.config_space.y_boundaries[1])
 
 		target_node = Node(x, y)
+
+		NN_start_time = time.time()
 		c_node = closest_point(self.nodes, target_node)
+		NN_time = time.time() - NN_start_time
 
 		# Generate 1 second trajectory towards target 
+		drive_to_start_time = time.time()
 		trajectory = get_trajectory(c_node, target_node)
+		drive_to_time = time.time() - drive_to_start_time
 
-		if not self.config_space.detect_point_collision(trajectory):
+		col_check_start_time = time.time()
+		is_collided = self.config_space.detect_point_collision(trajectory)
+		col_check_time = time.time() - col_check_start_time
+
+		computational_time = (NN_time, drive_to_time, col_check_time)
+
+		if not is_collided:
 			x, y = int(trajectory[-1][0]), int(trajectory[-1][1])
 			new_node = Node(x, y)
 			self.nodes.append(new_node)
@@ -51,25 +62,36 @@ class RRT:
 
 			for x,y in trajectory:
 				if x >= self.goal[0][0] and x <= self.goal[0][0] + self.goal[1] and y >= self.goal[0][1] and y <= self.goal[0][1] + self.goal[2]:
-					return True
+					return True, computational_time
 
-		return False
+		return False, computational_time
 
 
-
-	def explore(self):
-
+	def explore(self, show_evolution=True):
 		i = 0
+		NN_total_time = 0
+		drive_to_total_time = 0
+		col_check_total_time = 0
 		found = False
 		while not found:
-			print i
-			found = self.update()
-			if i%100 == 0:
+			# print i
+			found, update_time = self.update()
+			NN_total_time = NN_total_time + update_time[0]
+			drive_to_total_time = drive_to_total_time + update_time[1]
+			col_check_total_time = col_check_total_time + update_time[2]
+
+			if i%100 == 0 and show_evolution:
 				self.visualize()
 			i+=1
 
 		print 'found goal'
+		print 'Total elapsed time - '
+		print '                Nearest neighbor: ', NN_total_time
+		print '                Drive-to : ', drive_to_total_time
+		print '                Collision checking: ', col_check_total_time
+
 		self.visualize()
+
 
 	def visualize(self):
 		xy = map(lambda node: node.getxy(), self.nodes)
@@ -86,7 +108,6 @@ class RRT:
 				ax.plot([curr_x, conn_x], [curr_y, conn_y], color='b')
 		
 		plt.show()
-
 
 
 def get_trajectory(start, goal):

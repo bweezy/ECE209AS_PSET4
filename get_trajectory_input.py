@@ -71,9 +71,14 @@ def get_trajectory_input(initial_state, target_position):
         center_x = init_x + delta_x
         center_y = init_y + delta_y
 
-        trajectory_obj = patches.Arc((center_x, center_y), radius*2, radius*2,
-                     theta1=theta1*180.0/np.pi, theta2=theta2*180.0/np.pi, linewidth=1, color='b') # arc object to plot curved trajectory
-
+        theta1 = (theta1+2*np.pi)%(2*np.pi) # keep it between 0 to 360
+        theta2 = (theta2+2*np.pi)%(2*np.pi) # keep it between 0 to 360
+        if theta2-theta1 < 180:
+            trajectory_obj = patches.Arc((center_x, center_y), radius*2, radius*2,
+                         theta1=theta1*180.0/np.pi, theta2=theta2*180.0/np.pi, linewidth=1, color='b') # arc object to plot curved trajectory
+        else:
+            trajectory_obj = patches.Arc((center_x, center_y), radius*2, radius*2,
+                         theta1=theta2*180.0/np.pi, theta2=theta1*180.0/np.pi, linewidth=1, color='b') # arc object to plot curved trajectory
         # print round(d), 'init_theta: ', round(init_theta*180/np.pi), 'd_angle: ', round(d_angle*180/np.pi), 'delta angle', round(delta_angle*180/np.pi)#round(angle_btw_d_tan*180/np.pi), round(angle*180/np.pi) # for debugging
         # print round(angle_radius*180.0/np.pi), 'center: ', round(center_x), round(center_y), 'thetas: ', round(theta1*180.0/np.pi), round(theta2*180.0/np.pi), round(radius)
 
@@ -84,4 +89,4 @@ def get_trajectory_input(initial_state, target_position):
 
     final_angle = d_angle # orientation of robot at the goal
 
-    return trajectory_obj, omega_l, omega_r, final_angle
+    return trajectory_obj, omega_l, omega_r, final_angle, d
