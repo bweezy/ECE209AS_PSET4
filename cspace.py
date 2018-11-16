@@ -60,7 +60,7 @@ class Cspace:
 
 		# Plot Configuration Space Border #
 		rect2_outer = patches.Rectangle((0,0),width,length,linewidth=1,edgecolor='r',facecolor='r')
-		rect2_config_mask = patches.Rectangle((2,2),width-4,length-4,linewidth=0,edgecolor='w', facecolor='w', alpha=0.8)
+		rect2_config_mask = patches.Rectangle((2,2),width-4,length-4,linewidth=0,edgecolor='pink', facecolor='pink')
 		rect2_inner = patches.Rectangle((r,r),int(width-2*r),int(length-2*r),linewidth=1,edgecolor='w',facecolor='w')
 		ax.add_patch(rect2_outer)
 		ax.add_patch(rect2_config_mask)
@@ -73,7 +73,7 @@ class Cspace:
 			obs_rects_before.append(patches.Rectangle((obs.x, obs.y),obs.width, obs.length, linewidth=0, edgecolor='r', facecolor='r'))
 		
 		for obs in self.obstacles:
-			obs_rects_after.append(patches.Rectangle((obs.x, obs.y), obs.width, obs.length, linewidth=0, edgecolor='r', facecolor='r', alpha=0.2))
+			obs_rects_after.append(patches.Rectangle((obs.x, obs.y), obs.width, obs.length, linewidth=0, edgecolor='pink', facecolor='pink'))
 
 		# Plot Obstacles #
 		for rect in obs_rects_after:

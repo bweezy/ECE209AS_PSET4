@@ -8,7 +8,7 @@ import rrt
 import random
 import copy
 
-np.random.seed(4)
+np.random.seed(1)
 
 ## Map Parameters ##
 length = 750
@@ -19,17 +19,23 @@ r = 115/2.0
 
 ##### Workspace #####
 # Obstacles will be rectangles of length 15 and width 50
-obstacle_length = 580
-obstacle_width = 10
+obstacle_length = 260
+obstacle_width = 25
 
 # Workspace Obstacle locations #
-obstacle_locations = [(250, 50), (500, 120)]
+obstacle_locations = [(690, 50), (690, 440)]
 
 # Create Obstacles and their Rectangular Plot Representation #
 obstacles = []
 for x, y in obstacle_locations:
 	obs = obstacle.Obstacle(x, y, obstacle_length, obstacle_width)
 	obstacles.append(obs)
+
+obs = obstacle.Obstacle(300, 400, 100, 100)
+obstacles.append(obs)
+
+obs = obstacle.Obstacle(200, 150, 30, 500)
+obstacles.append(obs)
 
 obstacles_work = copy.deepcopy(obstacles)
 
@@ -45,8 +51,8 @@ for obs in obstacles:
 
 obstacles_config = copy.deepcopy(obstacles)
 
-initial_point = (100,100)
-goal_region = [(600,600), 50, 50]
+initial_point = (600,70)
+goal_region = [(670,350), 50, 50]
 
 # Create Config Space Object #
 config_space = cspace.Cspace(obstacles_work, obstacles_config, (r, width-r), (r, length-r), width, length, initial_point, goal_region)
