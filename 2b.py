@@ -130,15 +130,15 @@ if __name__ == "__main__":
 
         # plt.show()
 
-        angles = np.linspace(trajectory_obj.theta1, trajectory_obj.theta2, num=5)
-        radius = trajectory_obj.width/2.0
-        center = trajectory_obj.center
-        x = radius*np.cos(angles*np.pi/180) + center[0]
-        y = radius*np.sin(angles*np.pi/180) + center[1]
-        print x
-        print y
-        plt.scatter(x,y)
+        # angles = np.linspace(trajectory_obj.theta1, trajectory_obj.theta2, num=5)
+        # radius = trajectory_obj.width/2.0
+        # center = trajectory_obj.center
+        # x = radius*np.cos(angles*np.pi/180) + center[0]
+        # y = radius*np.sin(angles*np.pi/180) + center[1]
+        # print x
+        # print y
+        # plt.scatter(x,y)
         plt.show()
 
-        import pdb; pdb.set_trace()
+        # import pdb; pdb.set_trace()
 
